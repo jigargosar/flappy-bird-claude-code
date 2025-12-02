@@ -345,7 +345,7 @@ view model =
         [ width (String.fromFloat gameWidth)
         , height (String.fromFloat gameHeight)
         , viewBox ("0 0 " ++ String.fromFloat gameWidth ++ " " ++ String.fromFloat gameHeight)
-        , Svg.Attributes.style "display: block; margin: auto; background-color: #87CEEB;"
+        , Svg.Attributes.style "display: block; background-color: #87CEEB;"
         ]
         [ viewBackground
         , viewPipes model.pipes
