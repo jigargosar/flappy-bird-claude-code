@@ -345,7 +345,7 @@ view model =
         [ width (String.fromFloat gameWidth)
         , height (String.fromFloat gameHeight)
         , viewBox ("0 0 " ++ String.fromFloat gameWidth ++ " " ++ String.fromFloat gameHeight)
-        , Svg.Attributes.style "display: block; background-color: #87CEEB;"
+        , Svg.Attributes.style "display: block; background-color: #1e1b4b;"
         ]
         [ viewBackground
         , viewPipes model.pipes
@@ -362,7 +362,7 @@ viewBackground =
         , y (String.fromFloat (gameHeight - 100))
         , width (String.fromFloat gameWidth)
         , height "100"
-        , fill "#90EE90"
+        , fill "#4338ca"
         ]
         []
 
@@ -373,9 +373,7 @@ viewBird bird =
         [ cx (String.fromFloat (birdX + birdSize / 2))
         , cy (String.fromFloat (bird.y + birdSize / 2))
         , r (String.fromFloat (birdSize / 2))
-        , fill "#FFD700"
-        , stroke "#FF8C00"
-        , strokeWidth "3"
+        , fill "#f472b6"
         ]
         []
 
@@ -392,9 +390,7 @@ viewPipe pipe =
         , y "0"
         , width (String.fromFloat pipeWidth)
         , height (String.fromFloat pipe.gapY)
-        , fill "#228B22"
-        , stroke "#006400"
-        , strokeWidth "2"
+        , fill "#60a5fa"
         ]
         []
     , rect
@@ -402,9 +398,7 @@ viewPipe pipe =
         , y (String.fromFloat (pipe.gapY + pipeGap))
         , width (String.fromFloat pipeWidth)
         , height (String.fromFloat (gameHeight - pipe.gapY - pipeGap))
-        , fill "#228B22"
-        , stroke "#006400"
-        , strokeWidth "2"
+        , fill "#60a5fa"
         ]
         []
     ]
@@ -417,9 +411,7 @@ viewScore score =
         , y "50"
         , fontSize "48"
         , fontWeight "bold"
-        , fill "#FFFFFF"
-        , stroke "#000000"
-        , strokeWidth "2"
+        , fill "#22d3ee"
         , textAnchor "middle"
         ]
         [ text (String.fromInt score) ]
@@ -435,9 +427,7 @@ viewGameState gameState =
                     , y (String.fromFloat (gameHeight / 2))
                     , fontSize "32"
                     , fontWeight "bold"
-                    , fill "#FFFFFF"
-                    , stroke "#000000"
-                    , strokeWidth "2"
+                    , fill "#ffffff"
                     , textAnchor "middle"
                     ]
                     [ text "Click or Press Space" ]
@@ -445,9 +435,7 @@ viewGameState gameState =
                     [ x (String.fromFloat (gameWidth / 2))
                     , y (String.fromFloat (gameHeight / 2 + 40))
                     , fontSize "24"
-                    , fill "#FFFFFF"
-                    , stroke "#000000"
-                    , strokeWidth "1"
+                    , fill "#ffffff"
                     , textAnchor "middle"
                     ]
                     [ text "to Start" ]
@@ -463,9 +451,7 @@ viewGameState gameState =
                     , y (String.fromFloat (gameHeight / 2 - 40))
                     , fontSize "48"
                     , fontWeight "bold"
-                    , fill "#FF0000"
-                    , stroke "#000000"
-                    , strokeWidth "3"
+                    , fill "#f472b6"
                     , textAnchor "middle"
                     ]
                     [ text "Game Over" ]
@@ -473,9 +459,7 @@ viewGameState gameState =
                     [ x (String.fromFloat (gameWidth / 2))
                     , y (String.fromFloat (gameHeight / 2 + 20))
                     , fontSize "24"
-                    , fill "#FFFFFF"
-                    , stroke "#000000"
-                    , strokeWidth "2"
+                    , fill "#ffffff"
                     , textAnchor "middle"
                     ]
                     [ text "Press Space to Restart" ]
