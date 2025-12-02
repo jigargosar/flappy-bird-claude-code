@@ -3,9 +3,12 @@ module Main exposing (main)
 import Browser
 import Browser.Events
 import Html exposing (Html)
+import Html.Attributes
+import Html.Events exposing (onInput)
 import Json.Decode as Decode
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Svg.Events
 import Time
 
 
@@ -179,6 +182,9 @@ type Msg
     | Jump
     | Restart
     | CycleTheme
+    | PrevTheme
+    | SetTheme String
+    | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -219,13 +225,31 @@ update msg model =
         Restart ->
             case model.gameState of
                 GameOver ->
-                    init ()
+                    let
+                        ( newModel, cmd ) =
+                            init ()
+                    in
+                    ( { newModel | currentTheme = model.currentTheme }, cmd )
 
                 _ ->
                     ( model, Cmd.none )
 
         CycleTheme ->
             ( { model | currentTheme = model.currentTheme + 1 }, Cmd.none )
+
+        PrevTheme ->
+            ( { model | currentTheme = model.currentTheme - 1 }, Cmd.none )
+
+        SetTheme indexStr ->
+            case String.toInt indexStr of
+                Just index ->
+                    ( { model | currentTheme = index }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        NoOp ->
+            ( model, Cmd.none )
 
 
 updateBird : Model -> Model
@@ -361,9 +385,8 @@ subscriptions _ =
     Sub.batch
         [ Browser.Events.onAnimationFrame Frame
         , Browser.Events.onKeyDown (Decode.map (\_ -> Jump) (Decode.field "key" (Decode.string |> Decode.andThen spacebarDecoder)))
-        , Browser.Events.onClick (Decode.succeed Jump)
         , Browser.Events.onKeyDown (Decode.map (\_ -> Restart) (Decode.field "key" (Decode.string |> Decode.andThen restartDecoder)))
-        , Browser.Events.onKeyDown (Decode.map (\_ -> CycleTheme) (Decode.field "key" (Decode.string |> Decode.andThen themeKeyDecoder)))
+        , Browser.Events.onKeyDown keyDecoder
         ]
 
 
@@ -385,13 +408,27 @@ restartDecoder key =
         Decode.fail "Not spacebar"
 
 
-themeKeyDecoder : String -> Decode.Decoder ()
-themeKeyDecoder key =
-    if key == "t" || key == "T" then
-        Decode.succeed ()
+keyDecoder : Decode.Decoder Msg
+keyDecoder =
+    Decode.field "key" Decode.string
+        |> Decode.andThen
+            (\key ->
+                case key of
+                    "ArrowLeft" ->
+                        Decode.succeed PrevTheme
 
-    else
-        Decode.fail "Not T key"
+                    "ArrowRight" ->
+                        Decode.succeed CycleTheme
+
+                    "t" ->
+                        Decode.succeed CycleTheme
+
+                    "T" ->
+                        Decode.succeed CycleTheme
+
+                    _ ->
+                        Decode.fail "Not a theme key"
+            )
 
 
 
@@ -404,18 +441,24 @@ view model =
         theme =
             getTheme model.currentTheme
     in
-    svg
-        [ width (String.fromFloat gameWidth)
-        , height (String.fromFloat gameHeight)
-        , viewBox ("0 0 " ++ String.fromFloat gameWidth ++ " " ++ String.fromFloat gameHeight)
-        , Svg.Attributes.style ("display: block; background-color: " ++ theme.sky ++ ";")
+    Html.div
+        [ Html.Attributes.class "relative inline-block select-none"
         ]
-        [ viewBackground theme
-        , viewPipes theme model.pipes
-        , viewBird theme model.bird
-        , viewScore theme model.score
-        , viewGameState theme model.gameState
-        , viewThemeName theme
+        [ svg
+            [ width (String.fromFloat gameWidth)
+            , height (String.fromFloat gameHeight)
+            , viewBox ("0 0 " ++ String.fromFloat gameWidth ++ " " ++ String.fromFloat gameHeight)
+            , Svg.Attributes.class "block"
+            , Svg.Attributes.style ("background-color: " ++ theme.sky ++ ";")
+            , Svg.Events.on "click" (Decode.succeed Jump)
+            ]
+            [ viewBackground theme
+            , viewPipes theme model.pipes
+            , viewBird theme model.bird
+            , viewScore theme model.score
+            , viewGameState theme model.gameState
+            ]
+        , viewThemeControls model.currentTheme
         ]
 
 
@@ -530,13 +573,36 @@ viewGameState theme gameState =
                 ]
 
 
-viewThemeName : Theme -> Svg Msg
-viewThemeName theme =
-    text_
-        [ x (String.fromFloat (gameWidth / 2))
-        , y (String.fromFloat (gameHeight - 20))
-        , fontSize "14"
-        , fill theme.instructionText
-        , textAnchor "middle"
+viewThemeControls : Int -> Html Msg
+viewThemeControls currentIndex =
+    Html.div
+        [ Html.Attributes.class "absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-2 bg-black/70 rounded-md"
+        , Html.Events.stopPropagationOn "click" (Decode.succeed ( NoOp, True ))
+        , Html.Events.stopPropagationOn "mousedown" (Decode.succeed ( NoOp, True ))
+        , Html.Events.stopPropagationOn "mouseup" (Decode.succeed ( NoOp, True ))
+        , Html.Events.stopPropagationOn "keydown" (Decode.succeed ( NoOp, True ))
+        , Html.Events.stopPropagationOn "keyup" (Decode.succeed ( NoOp, True ))
+        , Html.Events.stopPropagationOn "keypress" (Decode.succeed ( NoOp, True ))
         ]
-        [ text ("Theme: " ++ theme.name ++ " (Press T to cycle)") ]
+        [ Html.span
+            [ Html.Attributes.class "text-gray-400 text-sm" ]
+            [ Html.text "← " ]
+        , Html.select
+            [ Html.Attributes.class "px-2 py-1 bg-gray-800 text-white border border-gray-600 rounded cursor-pointer text-xs"
+            , onInput SetTheme
+            , Html.Attributes.value (String.fromInt (modBy (List.length themes) currentIndex))
+            ]
+            (List.indexedMap
+                (\index theme ->
+                    Html.option
+                        [ Html.Attributes.value (String.fromInt index)
+                        , Html.Attributes.class "bg-gray-800 text-white"
+                        ]
+                        [ Html.text theme.name ]
+                )
+                themes
+            )
+        , Html.span
+            [ Html.Attributes.class "text-gray-400 text-sm" ]
+            [ Html.text " →" ]
+        ]
