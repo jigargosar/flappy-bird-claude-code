@@ -33,6 +33,7 @@ type alias Model =
     , score : Int
     , gameState : GameState
     , frameCount : Int
+    , currentTheme : Int
     }
 
 
@@ -53,6 +54,18 @@ type GameState
     = Ready
     | Playing
     | GameOver
+
+
+type alias Theme =
+    { name : String
+    , sky : String
+    , ground : String
+    , pipes : String
+    , bird : String
+    , score : String
+    , titleText : String
+    , instructionText : String
+    }
 
 
 
@@ -109,6 +122,37 @@ pipeSpawnInterval =
     120
 
 
+themes : List Theme
+themes =
+    [ { name = "CYBERPUNK DREAMS"
+      , sky = "#0a0a0a"
+      , ground = "#1a1a1a"
+      , pipes = "#1E90FF"
+      , bird = "#FF1493"
+      , score = "#00FF7F"
+      , titleText = "#FF1493"
+      , instructionText = "#e0e0e0"
+      }
+    , { name = "MIDNIGHT EMBERS"
+      , sky = "#0d1b2a"
+      , ground = "#1b263b"
+      , pipes = "#415a77"
+      , bird = "#ff9d5c"
+      , score = "#ffd89b"
+      , titleText = "#ff6b35"
+      , instructionText = "#e0e1dd"
+      }
+    ]
+
+
+getTheme : Int -> Theme
+getTheme index =
+    themes
+        |> List.drop (modBy (List.length themes) index)
+        |> List.head
+        |> Maybe.withDefault (Maybe.withDefault { name = "", sky = "", ground = "", pipes = "", bird = "", score = "", titleText = "", instructionText = "" } (List.head themes))
+
+
 
 -- INIT
 
@@ -120,6 +164,7 @@ init _ =
       , score = 0
       , gameState = Ready
       , frameCount = 0
+      , currentTheme = 0
       }
     , Cmd.none
     )
@@ -133,6 +178,7 @@ type Msg
     = Frame Time.Posix
     | Jump
     | Restart
+    | CycleTheme
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -177,6 +223,9 @@ update msg model =
 
                 _ ->
                     ( model, Cmd.none )
+
+        CycleTheme ->
+            ( { model | currentTheme = model.currentTheme + 1 }, Cmd.none )
 
 
 updateBird : Model -> Model
@@ -314,6 +363,7 @@ subscriptions _ =
         , Browser.Events.onKeyDown (Decode.map (\_ -> Jump) (Decode.field "key" (Decode.string |> Decode.andThen spacebarDecoder)))
         , Browser.Events.onClick (Decode.succeed Jump)
         , Browser.Events.onKeyDown (Decode.map (\_ -> Restart) (Decode.field "key" (Decode.string |> Decode.andThen restartDecoder)))
+        , Browser.Events.onKeyDown (Decode.map (\_ -> CycleTheme) (Decode.field "key" (Decode.string |> Decode.andThen themeKeyDecoder)))
         ]
 
 
@@ -335,62 +385,76 @@ restartDecoder key =
         Decode.fail "Not spacebar"
 
 
+themeKeyDecoder : String -> Decode.Decoder ()
+themeKeyDecoder key =
+    if key == "t" || key == "T" then
+        Decode.succeed ()
+
+    else
+        Decode.fail "Not T key"
+
+
 
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
+    let
+        theme =
+            getTheme model.currentTheme
+    in
     svg
         [ width (String.fromFloat gameWidth)
         , height (String.fromFloat gameHeight)
         , viewBox ("0 0 " ++ String.fromFloat gameWidth ++ " " ++ String.fromFloat gameHeight)
-        , Svg.Attributes.style "display: block; background-color: #1e1b4b;"
+        , Svg.Attributes.style ("display: block; background-color: " ++ theme.sky ++ ";")
         ]
-        [ viewBackground
-        , viewPipes model.pipes
-        , viewBird model.bird
-        , viewScore model.score
-        , viewGameState model.gameState
+        [ viewBackground theme
+        , viewPipes theme model.pipes
+        , viewBird theme model.bird
+        , viewScore theme model.score
+        , viewGameState theme model.gameState
+        , viewThemeName theme
         ]
 
 
-viewBackground : Svg Msg
-viewBackground =
+viewBackground : Theme -> Svg Msg
+viewBackground theme =
     rect
         [ x "0"
         , y (String.fromFloat (gameHeight - 100))
         , width (String.fromFloat gameWidth)
         , height "100"
-        , fill "#4338ca"
+        , fill theme.ground
         ]
         []
 
 
-viewBird : Bird -> Svg Msg
-viewBird bird =
+viewBird : Theme -> Bird -> Svg Msg
+viewBird theme bird =
     circle
         [ cx (String.fromFloat (birdX + birdSize / 2))
         , cy (String.fromFloat (bird.y + birdSize / 2))
         , r (String.fromFloat (birdSize / 2))
-        , fill "#f472b6"
+        , fill theme.bird
         ]
         []
 
 
-viewPipes : List Pipe -> Svg Msg
-viewPipes pipes =
-    g [] (List.concatMap viewPipe pipes)
+viewPipes : Theme -> List Pipe -> Svg Msg
+viewPipes theme pipes =
+    g [] (List.concatMap (viewPipe theme) pipes)
 
 
-viewPipe : Pipe -> List (Svg Msg)
-viewPipe pipe =
+viewPipe : Theme -> Pipe -> List (Svg Msg)
+viewPipe theme pipe =
     [ rect
         [ x (String.fromFloat pipe.x)
         , y "0"
         , width (String.fromFloat pipeWidth)
         , height (String.fromFloat pipe.gapY)
-        , fill "#60a5fa"
+        , fill theme.pipes
         ]
         []
     , rect
@@ -398,27 +462,27 @@ viewPipe pipe =
         , y (String.fromFloat (pipe.gapY + pipeGap))
         , width (String.fromFloat pipeWidth)
         , height (String.fromFloat (gameHeight - pipe.gapY - pipeGap))
-        , fill "#60a5fa"
+        , fill theme.pipes
         ]
         []
     ]
 
 
-viewScore : Int -> Svg Msg
-viewScore score =
+viewScore : Theme -> Int -> Svg Msg
+viewScore theme score =
     text_
         [ x (String.fromFloat (gameWidth / 2))
         , y "50"
         , fontSize "48"
         , fontWeight "bold"
-        , fill "#22d3ee"
+        , fill theme.score
         , textAnchor "middle"
         ]
         [ text (String.fromInt score) ]
 
 
-viewGameState : GameState -> Svg Msg
-viewGameState gameState =
+viewGameState : Theme -> GameState -> Svg Msg
+viewGameState theme gameState =
     case gameState of
         Ready ->
             g []
@@ -427,7 +491,7 @@ viewGameState gameState =
                     , y (String.fromFloat (gameHeight / 2))
                     , fontSize "32"
                     , fontWeight "bold"
-                    , fill "#ffffff"
+                    , fill theme.instructionText
                     , textAnchor "middle"
                     ]
                     [ text "Click or Press Space" ]
@@ -435,7 +499,7 @@ viewGameState gameState =
                     [ x (String.fromFloat (gameWidth / 2))
                     , y (String.fromFloat (gameHeight / 2 + 40))
                     , fontSize "24"
-                    , fill "#ffffff"
+                    , fill theme.instructionText
                     , textAnchor "middle"
                     ]
                     [ text "to Start" ]
@@ -451,7 +515,7 @@ viewGameState gameState =
                     , y (String.fromFloat (gameHeight / 2 - 40))
                     , fontSize "48"
                     , fontWeight "bold"
-                    , fill "#f472b6"
+                    , fill theme.titleText
                     , textAnchor "middle"
                     ]
                     [ text "Game Over" ]
@@ -459,8 +523,20 @@ viewGameState gameState =
                     [ x (String.fromFloat (gameWidth / 2))
                     , y (String.fromFloat (gameHeight / 2 + 20))
                     , fontSize "24"
-                    , fill "#ffffff"
+                    , fill theme.instructionText
                     , textAnchor "middle"
                     ]
                     [ text "Press Space to Restart" ]
                 ]
+
+
+viewThemeName : Theme -> Svg Msg
+viewThemeName theme =
+    text_
+        [ x (String.fromFloat (gameWidth / 2))
+        , y (String.fromFloat (gameHeight - 20))
+        , fontSize "14"
+        , fill theme.instructionText
+        , textAnchor "middle"
+        ]
+        [ text ("Theme: " ++ theme.name ++ " (Press T to cycle)") ]
