@@ -450,7 +450,7 @@ view model =
             , viewBox ("0 0 " ++ String.fromFloat gameWidth ++ " " ++ String.fromFloat gameHeight)
             , Svg.Attributes.class "block"
             , Svg.Attributes.style ("background-color: " ++ theme.sky ++ ";")
-            , Svg.Events.on "click" (Decode.succeed Jump)
+            , Svg.Events.on "pointerdown" (Decode.succeed Jump)
             ]
             [ viewBackground theme
             , viewPipes theme model.pipes
