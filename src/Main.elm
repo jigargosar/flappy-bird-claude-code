@@ -9,6 +9,7 @@ import Json.Decode as Decode
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events
+import Themes exposing (Theme)
 import Time
 
 
@@ -59,16 +60,6 @@ type GameState
     | GameOver
 
 
-type alias Theme =
-    { name : String
-    , sky : String
-    , ground : String
-    , pipes : String
-    , bird : String
-    , score : String
-    , titleText : String
-    , instructionText : String
-    }
 
 
 
@@ -125,35 +116,6 @@ pipeSpawnInterval =
     120
 
 
-themes : List Theme
-themes =
-    [ { name = "CYBERPUNK DREAMS"
-      , sky = "#0a0a0a"
-      , ground = "#1a1a1a"
-      , pipes = "#1E90FF"
-      , bird = "#FF1493"
-      , score = "#00FF7F"
-      , titleText = "#FF1493"
-      , instructionText = "#e0e0e0"
-      }
-    , { name = "MIDNIGHT EMBERS"
-      , sky = "#0d1b2a"
-      , ground = "#1b263b"
-      , pipes = "#415a77"
-      , bird = "#ff9d5c"
-      , score = "#ffd89b"
-      , titleText = "#ff6b35"
-      , instructionText = "#e0e1dd"
-      }
-    ]
-
-
-getTheme : Int -> Theme
-getTheme index =
-    themes
-        |> List.drop (modBy (List.length themes) index)
-        |> List.head
-        |> Maybe.withDefault (Maybe.withDefault { name = "", sky = "", ground = "", pipes = "", bird = "", score = "", titleText = "", instructionText = "" } (List.head themes))
 
 
 
@@ -439,7 +401,7 @@ view : Model -> Html Msg
 view model =
     let
         theme =
-            getTheme model.currentTheme
+            Themes.getTheme model.currentTheme
     in
     Html.div
         [ Html.Attributes.class "relative inline-block select-none"
@@ -590,7 +552,7 @@ viewThemeControls currentIndex =
         , Html.select
             [ Html.Attributes.class "px-2 py-1 bg-gray-800 text-white border border-gray-600 rounded cursor-pointer text-xs"
             , onInput SetTheme
-            , Html.Attributes.value (String.fromInt (modBy (List.length themes) currentIndex))
+            , Html.Attributes.value (String.fromInt (modBy (List.length Themes.themes) currentIndex))
             ]
             (List.indexedMap
                 (\index theme ->
@@ -600,7 +562,7 @@ viewThemeControls currentIndex =
                         ]
                         [ Html.text theme.name ]
                 )
-                themes
+                Themes.themes
             )
         , Html.span
             [ Html.Attributes.class "text-gray-400 text-sm" ]
