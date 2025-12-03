@@ -89,7 +89,7 @@ birdSize =
 
 birdCollisionSize : Float
 birdCollisionSize =
-    30
+    birdSize * 0.75
 
 
 gravity : Float
