@@ -4,17 +4,9 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
 
-viewBird : { bgColor : String, x : Float, y : Float, velocity : Float, size : Float } -> Svg msg
+viewBird : { bgColor : String } -> Svg msg
 viewBird config =
-    let
-        rotation =
-            clamp -30 90 (config.velocity * 5)
-    in
-    g
-        [ transform
-            ("translate(" ++ String.fromFloat (config.x + config.size / 2) ++ "," ++ String.fromFloat (config.y + config.size / 2) ++ ") " ++
-             "rotate(" ++ String.fromFloat rotation ++ ")")
-        ]
+    g []
         [ -- Body (ellipse)
           ellipse
             [ cx "0"

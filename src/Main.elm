@@ -439,13 +439,25 @@ viewBackground theme =
 
 viewBird : Theme -> Bird -> Svg Msg
 viewBird theme bird =
-    Sprites.viewBird
-        { bgColor = theme.bgBird
-        , x = birdX
-        , y = bird.y
-        , velocity = bird.velocity
-        , size = birdSize
-        }
+    let
+        rotation =
+            clamp -30 90 (bird.velocity * 5)
+
+        centerX =
+            birdX + birdSize / 2
+
+        centerY =
+            bird.y + birdSize / 2
+    in
+    g
+        [ transform
+            ("translate(" ++ String.fromFloat centerX ++ "," ++ String.fromFloat centerY ++ ") " ++
+             "rotate(" ++ String.fromFloat rotation ++ ")")
+        ]
+        [ Sprites.viewBird
+            { bgColor = theme.bgBird
+            }
+        ]
 
 
 viewPipes : Theme -> List Pipe -> Svg Msg
