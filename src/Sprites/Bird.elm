@@ -1,4 +1,4 @@
-module Sprites exposing (viewBird)
+module Sprites.Bird exposing (viewBird)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
