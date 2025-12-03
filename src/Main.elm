@@ -138,7 +138,7 @@ init _ =
 
 
 type Msg
-    = Frame Time.Posix
+    = Frame Float
     | Jump
     | Restart
     | CycleTheme
@@ -150,12 +150,21 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Frame _ ->
+        Frame rawDelta ->
+            let
+                -- Clamp delta to max 50ms to prevent huge jumps when tab returns from background
+                delta =
+                    Basics.min rawDelta 50.0
+
+                -- Convert to seconds for physics calculations
+                dt =
+                    delta / 1000.0
+            in
             case model.gameState of
                 Playing ->
                     model
-                        |> updateBird
-                        |> updatePipes
+                        |> updateBird dt
+                        |> updatePipes dt
                         |> spawnPipes
                         |> updateScore
                         -- |> checkCollisions
@@ -212,17 +221,21 @@ update msg model =
             ( model, Cmd.none )
 
 
-updateBird : Model -> Model
-updateBird model =
+updateBird : Float -> Model -> Model
+updateBird dt model =
     let
         bird =
             model.bird
 
+        -- Convert gravity from per-frame to per-second (gravity * 60fps = 36 units/sec)
+        gravityPerSecond =
+            gravity * 60
+
         newVelocity =
-            bird.velocity + gravity
+            bird.velocity + (gravityPerSecond * dt)
 
         calculatedY =
-            bird.y + newVelocity
+            bird.y + (newVelocity * dt * 60)
 
         maxY =
             gameHeight - birdSize
@@ -233,12 +246,16 @@ updateBird model =
     { model | bird = { bird | y = newY, velocity = newVelocity } }
 
 
-updatePipes : Model -> Model
-updatePipes model =
+updatePipes : Float -> Model -> Model
+updatePipes dt model =
     let
+        -- Convert pipeSpeed from per-frame to per-second (pipeSpeed * 60fps = 120 units/sec)
+        pipeSpeedPerSecond =
+            pipeSpeed * 60
+
         updatedPipes =
             model.pipes
-                |> List.map (\pipe -> { pipe | x = pipe.x - pipeSpeed })
+                |> List.map (\pipe -> { pipe | x = pipe.x - (pipeSpeedPerSecond * dt) })
                 |> List.filter (\pipe -> pipe.x > -pipeWidth)
     in
     { model | pipes = updatedPipes }
@@ -352,7 +369,7 @@ checkPipeCollision bird pipe =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ Browser.Events.onAnimationFrame Frame
+        [ Browser.Events.onAnimationFrameDelta Frame
         , Browser.Events.onKeyDown (Decode.map (\_ -> Jump) (Decode.field "key" (Decode.string |> Decode.andThen spacebarDecoder)))
         , Browser.Events.onKeyDown (Decode.map (\_ -> Restart) (Decode.field "key" (Decode.string |> Decode.andThen restartDecoder)))
         , Browser.Events.onKeyDown keyDecoder
