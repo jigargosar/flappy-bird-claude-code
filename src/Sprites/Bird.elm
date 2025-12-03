@@ -18,7 +18,7 @@ viewBird config =
             []
         , -- Beak (triangle/polygon)
           polygon
-            [ points "12,-1 20,0 12,1"
+            [ points "12,-3 25,0 12,3"
             , fill config.bgColor
             , opacity "0.8"
             ]
@@ -49,21 +49,21 @@ viewBird config =
             , opacity "0.7"
             ]
             []
-        , -- Tail feathers (small triangles)
+        , -- Tail feathers (enlarged triangles)
           polygon
-            [ points "-15,0 -20,-3 -18,0"
+            [ points "-15,0 -25,-6 -20,0"
             , fill config.bgColor
             , opacity "0.8"
             ]
             []
         , polygon
-            [ points "-15,2 -20,4 -18,3"
+            [ points "-15,4 -25,8 -20,5"
             , fill config.bgColor
             , opacity "0.8"
             ]
             []
         , polygon
-            [ points "-15,-2 -20,-5 -18,-3"
+            [ points "-15,-4 -25,-10 -20,-5"
             , fill config.bgColor
             , opacity "0.8"
             ]

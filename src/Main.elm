@@ -87,6 +87,11 @@ birdSize =
     40
 
 
+birdCollisionSize : Float
+birdCollisionSize =
+    30
+
+
 gravity : Float
 gravity =
     0.6
@@ -344,17 +349,21 @@ checkCollisions model =
 checkPipeCollision : Bird -> Pipe -> Bool
 checkPipeCollision bird pipe =
     let
+        -- Center collision box on bird body (offset by half the difference)
+        collisionOffset =
+            (birdSize - birdCollisionSize) / 2
+
         birdLeft =
-            birdX
+            birdX + collisionOffset
 
         birdRight =
-            birdX + birdSize
+            birdX + collisionOffset + birdCollisionSize
 
         birdTop =
-            bird.y
+            bird.y + collisionOffset
 
         birdBottom =
-            bird.y + birdSize
+            bird.y + collisionOffset + birdCollisionSize
 
         pipeLeft =
             pipe.x
