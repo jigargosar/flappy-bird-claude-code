@@ -176,7 +176,7 @@ update msg model =
                                 |> updatePipes dt
                                 |> spawnPipes dt
                                 |> updateScore
-                                -- |> checkCollisions
+                                |> checkCollisions
                                 |> (\m -> { m | frameCount = m.frameCount + 1 })
                     in
                     ( updatedModel, Cmd.none )
