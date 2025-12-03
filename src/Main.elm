@@ -40,6 +40,7 @@ type alias Model =
     , gameState : GameState
     , frameCount : Int
     , currentTheme : Int
+    , timeSinceLastPipe : Float
     }
 
 
@@ -128,6 +129,7 @@ init _ =
       , gameState = Ready
       , frameCount = 0
       , currentTheme = 0
+      , timeSinceLastPipe = 0.0
       }
     , Cmd.none
     )
@@ -162,13 +164,17 @@ update msg model =
             in
             case model.gameState of
                 Playing ->
-                    model
-                        |> updateBird dt
-                        |> updatePipes dt
-                        |> spawnPipes
-                        |> updateScore
-                        -- |> checkCollisions
-                        |> (\m -> ( { m | frameCount = m.frameCount + 1 }, Cmd.none ))
+                    let
+                        updatedModel =
+                            model
+                                |> updateBird dt
+                                |> updatePipes dt
+                                |> spawnPipes dt
+                                |> updateScore
+                                -- |> checkCollisions
+                                |> (\m -> { m | frameCount = m.frameCount + 1 })
+                    in
+                    ( updatedModel, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -261,12 +267,21 @@ updatePipes dt model =
     { model | pipes = updatedPipes }
 
 
-spawnPipes : Model -> Model
-spawnPipes model =
-    if modBy pipeSpawnInterval model.frameCount == 0 then
+spawnPipes : Float -> Model -> Model
+spawnPipes dt model =
+    let
+        newTime =
+            model.timeSinceLastPipe + dt
+
+        -- Spawn every 2 seconds (120 frames / 60 fps = 2 seconds)
+        spawnInterval =
+            2.0
+    in
+    if newTime >= spawnInterval then
         let
+            -- Hash-based variation for better pseudo-random distribution
             variation =
-                toFloat (modBy 250 (model.frameCount // 10))
+                toFloat (modBy 250 (model.frameCount * 2654435761))
 
             gapY =
                 100 + variation
@@ -274,10 +289,13 @@ spawnPipes model =
             newPipe =
                 { x = gameWidth, gapY = gapY, scored = False }
         in
-        { model | pipes = model.pipes ++ [ newPipe ] }
+        { model
+            | pipes = model.pipes ++ [ newPipe ]
+            , timeSinceLastPipe = newTime - spawnInterval
+        }
 
     else
-        model
+        { model | timeSinceLastPipe = newTime }
 
 
 updateScore : Model -> Model
