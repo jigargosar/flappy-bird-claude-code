@@ -488,20 +488,131 @@ viewPipes theme pipes =
 
 viewPipe : Theme -> Pipe -> List (Svg Msg)
 viewPipe theme pipe =
-    [ rect
+    let
+        capHeight =
+            25
+
+        capWidth =
+            pipeWidth + 8
+
+        capOffset =
+            (capWidth - pipeWidth) / 2
+
+        topPipeHeight =
+            pipe.gapY
+
+        bottomPipeY =
+            pipe.gapY + pipeGap
+
+        bottomPipeHeight =
+            gameHeight - pipe.gapY - pipeGap
+    in
+    [ -- Top pipe body
+      rect
         [ x (String.fromFloat pipe.x)
         , y "0"
         , width (String.fromFloat pipeWidth)
-        , height (String.fromFloat pipe.gapY)
+        , height (String.fromFloat (topPipeHeight - capHeight))
         , fill theme.bgPipes
         ]
         []
-    , rect
+    , -- Top pipe highlight (left side)
+      rect
         [ x (String.fromFloat pipe.x)
-        , y (String.fromFloat (pipe.gapY + pipeGap))
-        , width (String.fromFloat pipeWidth)
-        , height (String.fromFloat (gameHeight - pipe.gapY - pipeGap))
+        , y "0"
+        , width "4"
+        , height (String.fromFloat (topPipeHeight - capHeight))
+        , fill "rgba(255, 255, 255, 0.15)"
+        ]
+        []
+    , -- Top pipe shadow (right side)
+      rect
+        [ x (String.fromFloat (pipe.x + pipeWidth - 4))
+        , y "0"
+        , width "4"
+        , height (String.fromFloat (topPipeHeight - capHeight))
+        , fill "rgba(0, 0, 0, 0.2)"
+        ]
+        []
+    , -- Top pipe cap
+      rect
+        [ x (String.fromFloat (pipe.x - capOffset))
+        , y (String.fromFloat (topPipeHeight - capHeight))
+        , width (String.fromFloat capWidth)
+        , height (String.fromFloat capHeight)
         , fill theme.bgPipes
+        ]
+        []
+    , -- Top pipe cap highlight
+      rect
+        [ x (String.fromFloat (pipe.x - capOffset))
+        , y (String.fromFloat (topPipeHeight - capHeight))
+        , width "4"
+        , height (String.fromFloat capHeight)
+        , fill "rgba(255, 255, 255, 0.2)"
+        ]
+        []
+    , -- Top pipe cap shadow
+      rect
+        [ x (String.fromFloat (pipe.x + pipeWidth + capOffset - 4))
+        , y (String.fromFloat (topPipeHeight - capHeight))
+        , width "4"
+        , height (String.fromFloat capHeight)
+        , fill "rgba(0, 0, 0, 0.25)"
+        ]
+        []
+    , -- Bottom pipe body
+      rect
+        [ x (String.fromFloat pipe.x)
+        , y (String.fromFloat (bottomPipeY + capHeight))
+        , width (String.fromFloat pipeWidth)
+        , height (String.fromFloat (bottomPipeHeight - capHeight))
+        , fill theme.bgPipes
+        ]
+        []
+    , -- Bottom pipe highlight (left side)
+      rect
+        [ x (String.fromFloat pipe.x)
+        , y (String.fromFloat (bottomPipeY + capHeight))
+        , width "4"
+        , height (String.fromFloat (bottomPipeHeight - capHeight))
+        , fill "rgba(255, 255, 255, 0.15)"
+        ]
+        []
+    , -- Bottom pipe shadow (right side)
+      rect
+        [ x (String.fromFloat (pipe.x + pipeWidth - 4))
+        , y (String.fromFloat (bottomPipeY + capHeight))
+        , width "4"
+        , height (String.fromFloat (bottomPipeHeight - capHeight))
+        , fill "rgba(0, 0, 0, 0.2)"
+        ]
+        []
+    , -- Bottom pipe cap
+      rect
+        [ x (String.fromFloat (pipe.x - capOffset))
+        , y (String.fromFloat bottomPipeY)
+        , width (String.fromFloat capWidth)
+        , height (String.fromFloat capHeight)
+        , fill theme.bgPipes
+        ]
+        []
+    , -- Bottom pipe cap highlight
+      rect
+        [ x (String.fromFloat (pipe.x - capOffset))
+        , y (String.fromFloat bottomPipeY)
+        , width "4"
+        , height (String.fromFloat capHeight)
+        , fill "rgba(255, 255, 255, 0.2)"
+        ]
+        []
+    , -- Bottom pipe cap shadow
+      rect
+        [ x (String.fromFloat (pipe.x + pipeWidth + capOffset - 4))
+        , y (String.fromFloat bottomPipeY)
+        , width "4"
+        , height (String.fromFloat capHeight)
+        , fill "rgba(0, 0, 0, 0.25)"
         ]
         []
     ]
