@@ -18,7 +18,7 @@ viewBird config =
             []
         , -- Beak (triangle/polygon)
           polygon
-            [ points "12,0 22,0 17,-3"
+            [ points "12,-1 20,0 12,1"
             , fill config.bgColor
             , opacity "0.8"
             ]
