@@ -467,7 +467,7 @@ view model =
             ]
             [ viewBackground theme
             , viewPipes theme model.pipes
-            , viewBird theme model.bird
+            , viewBird theme model.bird model.frameCount
             , viewScore theme model.score
             , viewGameState theme model.gameState
             ]
@@ -487,8 +487,8 @@ viewBackground theme =
         []
 
 
-viewBird : Theme -> Bird -> Svg Msg
-viewBird theme bird =
+viewBird : Theme -> Bird -> Int -> Svg Msg
+viewBird theme bird frameCount =
     let
         defaultBirdSize =
             30
@@ -522,6 +522,7 @@ viewBird theme bird =
         ]
         [ Sprites.Bird.viewBird
             { bgColor = theme.bgBird
+            , frameCount = frameCount
             }
         ]
 

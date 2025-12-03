@@ -4,8 +4,18 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
 
-viewBird : { bgColor : String } -> Svg msg
+viewBird : { bgColor : String, frameCount : Int } -> Svg msg
 viewBird config =
+    let
+        -- Calculate wing rotation angle using sine wave for smooth flapping
+        -- Flap cycle: 25 frames per full cycle (slower, smoother flapping)
+        flapCycle =
+            25
+
+        -- Convert frame to angle (-45 to 45 degrees for prominent but not excessive flapping)
+        wingAngle =
+            sin (toFloat (modBy flapCycle config.frameCount) * (2 * pi / toFloat flapCycle)) * 45
+    in
     g []
         [ -- Body (ellipse)
           ellipse
@@ -39,14 +49,17 @@ viewBird config =
             , fill "black"
             ]
             []
-        , -- Wing (ellipse)
+        , -- Wing (ellipse like body, with rotation animation)
           ellipse
-            [ cx "-3"
-            , cy "5"
-            , rx "8"
-            , ry "5"
+            [ cx "-10"
+            , cy "7"
+            , rx "10"
+            , ry "6"
             , fill config.bgColor
-            , opacity "0.7"
+            , stroke "rgba(0,0,0,0.4)"
+            , strokeWidth "1.5"
+            , opacity "0.9"
+            , transform ("rotate(" ++ String.fromFloat wingAngle ++ " 0 7)")
             ]
             []
         , -- Tail feathers (enlarged triangles)
