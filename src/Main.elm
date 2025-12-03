@@ -411,7 +411,7 @@ view model =
             , height (String.fromFloat gameHeight)
             , viewBox ("0 0 " ++ String.fromFloat gameWidth ++ " " ++ String.fromFloat gameHeight)
             , Svg.Attributes.class "block"
-            , Svg.Attributes.style ("background-color: " ++ theme.sky ++ ";")
+            , Svg.Attributes.style ("background-color: " ++ theme.bgSky ++ ";")
             , Svg.Events.on "pointerdown" (Decode.succeed Jump)
             ]
             [ viewBackground theme
@@ -431,7 +431,7 @@ viewBackground theme =
         , y (String.fromFloat (gameHeight - 100))
         , width (String.fromFloat gameWidth)
         , height "100"
-        , fill theme.ground
+        , fill theme.bgGround
         ]
         []
 
@@ -442,7 +442,7 @@ viewBird theme bird =
         [ cx (String.fromFloat (birdX + birdSize / 2))
         , cy (String.fromFloat (bird.y + birdSize / 2))
         , r (String.fromFloat (birdSize / 2))
-        , fill theme.bird
+        , fill theme.bgBird
         ]
         []
 
@@ -459,7 +459,7 @@ viewPipe theme pipe =
         , y "0"
         , width (String.fromFloat pipeWidth)
         , height (String.fromFloat pipe.gapY)
-        , fill theme.pipes
+        , fill theme.bgPipes
         ]
         []
     , rect
@@ -467,7 +467,7 @@ viewPipe theme pipe =
         , y (String.fromFloat (pipe.gapY + pipeGap))
         , width (String.fromFloat pipeWidth)
         , height (String.fromFloat (gameHeight - pipe.gapY - pipeGap))
-        , fill theme.pipes
+        , fill theme.bgPipes
         ]
         []
     ]
@@ -480,7 +480,7 @@ viewScore theme score =
         , y "50"
         , fontSize "48"
         , fontWeight "bold"
-        , fill theme.score
+        , fill theme.fgScore
         , textAnchor "middle"
         ]
         [ text (String.fromInt score) ]
@@ -496,7 +496,7 @@ viewGameState theme gameState =
                     , y (String.fromFloat (gameHeight / 2))
                     , fontSize "32"
                     , fontWeight "bold"
-                    , fill theme.instructionText
+                    , fill theme.fgReadyTitle
                     , textAnchor "middle"
                     ]
                     [ text "Click or Press Space" ]
@@ -504,7 +504,7 @@ viewGameState theme gameState =
                     [ x (String.fromFloat (gameWidth / 2))
                     , y (String.fromFloat (gameHeight / 2 + 40))
                     , fontSize "24"
-                    , fill theme.instructionText
+                    , fill theme.fgReadySubtitle
                     , textAnchor "middle"
                     ]
                     [ text "to Start" ]
@@ -520,7 +520,7 @@ viewGameState theme gameState =
                     , y (String.fromFloat (gameHeight / 2 - 40))
                     , fontSize "48"
                     , fontWeight "bold"
-                    , fill theme.titleText
+                    , fill theme.fgGameOverTitle
                     , textAnchor "middle"
                     ]
                     [ text "Game Over" ]
@@ -528,7 +528,7 @@ viewGameState theme gameState =
                     [ x (String.fromFloat (gameWidth / 2))
                     , y (String.fromFloat (gameHeight / 2 + 20))
                     , fontSize "24"
-                    , fill theme.instructionText
+                    , fill theme.fgGameOverSubtitle
                     , textAnchor "middle"
                     ]
                     [ text "Press Space to Restart" ]

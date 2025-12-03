@@ -3,26 +3,30 @@ module Themes exposing (Theme, defaultTheme, themes, getTheme)
 
 type alias Theme =
     { name : String
-    , sky : String
-    , ground : String
-    , pipes : String
-    , bird : String
-    , score : String
-    , titleText : String
-    , instructionText : String
+    , bgSky : String
+    , bgGround : String
+    , bgPipes : String
+    , bgBird : String
+    , fgScore : String
+    , fgReadyTitle : String
+    , fgReadySubtitle : String
+    , fgGameOverTitle : String
+    , fgGameOverSubtitle : String
     }
 
 
 defaultTheme : Theme
 defaultTheme =
     { name = "CYBERPUNK DREAMS"
-    , sky = "#0a0a0a"
-    , ground = "#1a1a1a"
-    , pipes = "#1E90FF"
-    , bird = "#FF1493"
-    , score = "#00FF7F"
-    , titleText = "#FF1493"
-    , instructionText = "#e0e0e0"
+    , bgSky = "#0a0a0a"
+    , bgGround = "#1a1a1a"
+    , bgPipes = "#1E90FF"
+    , bgBird = "#FF1493"
+    , fgScore = "#00FF7F"
+    , fgReadyTitle = "#e0e0e0"
+    , fgReadySubtitle = "#e0e0e0"
+    , fgGameOverTitle = "#FF1493"
+    , fgGameOverSubtitle = "#e0e0e0"
     }
 
 
@@ -30,13 +34,15 @@ themes : List Theme
 themes =
     [ defaultTheme
     , { name = "MIDNIGHT EMBERS"
-      , sky = "#0d1b2a"
-      , ground = "#1b263b"
-      , pipes = "#415a77"
-      , bird = "#ff9d5c"
-      , score = "#ffd89b"
-      , titleText = "#ff6b35"
-      , instructionText = "#e0e1dd"
+      , bgSky = "#0d1b2a"
+      , bgGround = "#1b263b"
+      , bgPipes = "#415a77"
+      , bgBird = "#ff9d5c"
+      , fgScore = "#ffd89b"
+      , fgReadyTitle = "#e0e1dd"
+      , fgReadySubtitle = "#e0e1dd"
+      , fgGameOverTitle = "#ff6b35"
+      , fgGameOverSubtitle = "#e0e1dd"
       }
     ]
 
