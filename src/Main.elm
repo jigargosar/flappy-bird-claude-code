@@ -62,8 +62,6 @@ type GameState
 
 
 
-
-
 -- CONSTANTS
 
 
@@ -84,7 +82,7 @@ birdX =
 
 birdSize : Float
 birdSize =
-    30
+    40
 
 
 gravity : Float
@@ -115,8 +113,6 @@ pipeSpeed =
 pipeSpawnInterval : Int
 pipeSpawnInterval =
     120
-
-
 
 
 
@@ -161,7 +157,7 @@ update msg model =
                         |> updatePipes
                         |> spawnPipes
                         |> updateScore
-                        |> checkCollisions
+                        -- |> checkCollisions
                         |> (\m -> ( { m | frameCount = m.frameCount + 1 }, Cmd.none ))
 
                 _ ->
@@ -224,8 +220,14 @@ updateBird model =
         newVelocity =
             bird.velocity + gravity
 
-        newY =
+        calculatedY =
             bird.y + newVelocity
+
+        maxY =
+            gameHeight - birdSize
+
+        newY =
+            clamp 0 maxY calculatedY
     in
     { model | bird = { bird | y = newY, velocity = newVelocity } }
 
@@ -245,8 +247,11 @@ spawnPipes : Model -> Model
 spawnPipes model =
     if modBy pipeSpawnInterval model.frameCount == 0 then
         let
+            variation =
+                toFloat (modBy 250 (model.frameCount // 10))
+
             gapY =
-                200 + toFloat (modBy 200 (model.frameCount // 10)) * 1.5
+                100 + variation
 
             newPipe =
                 { x = gameWidth, gapY = gapY, scored = False }
@@ -440,6 +445,12 @@ viewBackground theme =
 viewBird : Theme -> Bird -> Svg Msg
 viewBird theme bird =
     let
+        defaultBirdSize =
+            30
+
+        scale =
+            birdSize / defaultBirdSize
+
         rotation =
             clamp -30 90 (bird.velocity * 5)
 
@@ -451,8 +462,18 @@ viewBird theme bird =
     in
     g
         [ transform
-            ("translate(" ++ String.fromFloat centerX ++ "," ++ String.fromFloat centerY ++ ") " ++
-             "rotate(" ++ String.fromFloat rotation ++ ")")
+            ("translate("
+                ++ String.fromFloat centerX
+                ++ ","
+                ++ String.fromFloat centerY
+                ++ ") "
+                ++ "rotate("
+                ++ String.fromFloat rotation
+                ++ ") "
+                ++ "scale("
+                ++ String.fromFloat scale
+                ++ ")"
+            )
         ]
         [ Sprites.viewBird
             { bgColor = theme.bgBird
